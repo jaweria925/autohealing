@@ -6,84 +6,83 @@ on:
       - main
 
 permissions:
-    contents: read
-    id-token: write
+  contents: read
+  id-token: write
+
 jobs:
   terraform:
     name: Apply Infrastructure
     runs-on: ubuntu-latest
     steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-            - name: Setup Terraform
-              uses: hashicorp/setup-terraform@v2
-              with:
-                terraform_version: 1.13.3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.13.3
 
-            - name: Configure Google Cloud credentials
-              uses: google-github-actions/auth@v3
-              with:
-                workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-                service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+      - name: Configure Google Cloud credentials
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
 
-            - name: Initialize Terraform
-              run: terraform init
+      - name: Initialize Terraform
+        run: terraform init
 
-            - name: Validate Terraform configuration
-              run: terraform validate
+      - name: Validate Terraform configuration
+        run: terraform validate
 
-            - name: Plan Terraform changes
-              run: terraform plan --out=tfplan
+      - name: Plan Terraform changes
+        run: terraform plan --out=tfplan
 
+  build-test:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v2
 
-    build-test:
-        permissions:
-            contents: read
-            packages: write
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.IAC_TOKEN }}
 
-        runs-on : ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: my-app:v1
 
-            - name: Setup Docker
-              uses: docker/setup-buildx-action@v2
+      - name: Push image to ghcr.io
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/my-app:v1
 
-            - name: Login to Github Repository
-              uses: docker/login-action@v3
-              with:
-                registry: ghcr.io
-                username: ${{ github.actor }}
-                password: ${{ secrets.IAC_TOKEN }}
-
-            - name: Build Docker image
-              uses: docker/build-push-action@v4
-              with:
-                context: .
-                push: false
-                tags: my-app:v1
-
-            - name: push image to ghcr.io
-              uses: docker/build-push-action@v4
-              with:
-                context: .
-                push: true
-                tags: ghcr.io/${{ github.repository_owner }}/my-app:v1
-    #deploy via image to gcp vm
-    
-    # deploy:
-    #     name: Deploy
-    #     runs-on: ubuntu-latest
-    #     needs: [Apply-Infrastructure, build-test]
-    #     steps:
-    #         - name: Checkout code
-    #           uses: actions/checkout@v3
-
-    #         - name: Setup SSH
-    #           uses: webfactory/ssh-agent@v0.5.4 
-    #           with:
-    #             ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }} 
+  # deploy via image to gcp vm
+  # deploy:
+  #   name: Deploy
+  #   runs-on: ubuntu-latest
+  #   needs: [terraform, build-test]
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #
+  #     - name: Setup SSH
+  #       uses: webfactory/ssh-agent@v0.5.4
+  #       with:
+  #         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
 
