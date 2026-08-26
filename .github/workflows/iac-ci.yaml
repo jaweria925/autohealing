@@ -20,6 +20,12 @@ jobs:
               with:
                 terraform_version: 1.13.3
 
+            - name: Configure Google Cloud credentials
+              uses: google-github-actions/auth@v1
+              with:
+                workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+                service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+
             - name: Initialize Terraform
               run: terraform init
 
