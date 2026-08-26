@@ -4,11 +4,12 @@ on:
   push:
     branches:
       - main
+
+permissions:
+    contents: read
+    id-token: write
 jobs:
   terraform:
-    permissions:
-      contents: read
-      id-token: write
     name: Apply Infrastructure
     runs-on: ubuntu-latest
     steps:
