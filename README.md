@@ -115,4 +115,11 @@ This is intended to be a repeatable, idempotent deployment model where a second 
 This project demonstrates an auto-healing, self-provisioning web tier on Google Cloud with layered modular Terraform code, health-based replacement, and a global load balancer for stateless web traffic.
 
 
-## Cost 
+## Incremental Scripts
+c8103d5 (HEAD -> main, origin/main) update theoutput.tf file
+75a77b4 update theoutput.tf file
+5a106cc Merge remote-tracking branch 'origin/main'
+ec50f96 update script and modules file
+cd9f64a Iac-autohealing Diagram.drawio
+945ba7c add gcp credentials
+a6d5347 add gcp credentials
