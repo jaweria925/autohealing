@@ -36,8 +36,9 @@ resource "google_compute_target_http_proxy" "iac_target_http_proxy" {
 
 #forwarding rule
 resource "google_compute_global_forwarding_rule" "iac_forwarding_rule" {
-  name    = "${var.loadbalancer_name}-forwarding-rule"
-  project = var.project_id
+  name                  = "${var.loadbalancer_name}-forwarding-rule"
+  project               = var.project_id
+  load_balancing_scheme = "EXTERNAL"
 
   ip_address = google_compute_global_address.iac_global_ip.address
   port_range = "80"

@@ -50,11 +50,11 @@ module "compute" {
 
 module "loadbalancer" {
   source = "./modules/loadbalancer"
-  loadbalancer_name    = "iac-load-balancer"
-  global_ip_name       = "iac-global-ip"
-  backend_pool         = "iac-backend-pool"
-  project_id           = var.project_id
-  health_check_id      = module.healthcheck.health_check_id
-  backend_instance_group = module.compute.instance_group_id
+  loadbalancer_name      = "iac-load-balancer"
+  global_ip_name         = "iac-global-ip"
+  backend_pool           = "iac-backend-pool"
+  project_id             = var.project_id
+  health_check_id        = module.healthcheck.health_check_id
+  backend_instance_group = module.compute.instance_group
 }
 

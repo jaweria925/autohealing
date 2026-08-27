@@ -3,7 +3,7 @@ data "google_compute_image" "ubuntu" {
     project = var.image_project
 }
 resource "google_compute_instance_template" "iac_instance_template" {
-    name = "iac-instance-template"
+    name_prefix = "iac-instance-template-"
     machine_type = var.machine_type
     tags = var.target_tags
 
@@ -22,7 +22,9 @@ resource "google_compute_instance_template" "iac_instance_template" {
         startup-script = file("${path.module}/startup.sh")
     }
 
-
+    lifecycle {
+        create_before_destroy = true
+    }
 }
 # create the managed instance group
 resource "google_compute_instance_group_manager" "iac_instance_group" {
@@ -34,7 +36,14 @@ resource "google_compute_instance_group_manager" "iac_instance_group" {
     }
     target_size        = var.target_size
     zone               = var.zone
-    
+
+    update_policy {
+        type                         = "PROACTIVE"
+        minimal_action               = "REPLACE"
+        max_unavailable_fixed        = 0
+        max_surge_fixed              = 1
+        replacement_method           = "SUBSTITUTE"
+    }
 
     named_port {
         name = "http"
